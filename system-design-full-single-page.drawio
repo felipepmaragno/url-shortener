@@ -1,0 +1,117 @@
+<mxfile host="65bd71144e">
+    <diagram name="URL Shortener Full Diagram" id="url-shortener-full-study">
+        <mxGraphModel dx="2278" dy="468" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1700" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="URL Shortener — Full System Design Diagram" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="20" width="2160" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="fr" value="&lt;h2&gt;Functional requirements&lt;/h2&gt;&lt;div&gt;Core:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;Create a short URL from a long URL.&lt;/li&gt;&lt;li&gt;Redirect a short code to the original long URL.&lt;/li&gt;&lt;li&gt;Return 404 for unknown/disabled codes.&lt;/li&gt;&lt;li&gt;Validate URL format before creation.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;Optional extensions:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;Custom aliases.&lt;/li&gt;&lt;li&gt;Expiration / TTL.&lt;/li&gt;&lt;li&gt;User accounts and ownership.&lt;/li&gt;&lt;li&gt;Analytics: clicks, referrer, country, device.&lt;/li&gt;&lt;/ul&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="90" width="340" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="nfr" value="&lt;h2&gt;Non-functional requirements&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;100M new URLs/day.&lt;/li&gt;&lt;li&gt;Read:write ratio = 10:1.&lt;/li&gt;&lt;li&gt;High availability for redirects.&lt;/li&gt;&lt;li&gt;Low redirect latency; redirects are the hot path.&lt;/li&gt;&lt;li&gt;Short codes should be compact, but not dangerously tiny.&lt;/li&gt;&lt;li&gt;Base62 alphabet: a-z, A-Z, 0-9.&lt;/li&gt;&lt;li&gt;10-year retention assumption.&lt;/li&gt;&lt;li&gt;Eventual consistency acceptable for analytics.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;Clarify during design: mutable links? protected links? p99 latency? availability target?&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="90" width="380" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="estimates" value="&lt;h2&gt;Back-of-envelope estimates&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Writes: 100,000,000 / 86,400 ≈ &lt;b&gt;1,157 writes/sec&lt;/b&gt;.&lt;/li&gt;&lt;li&gt;Reads: 1,157 * 10 ≈ &lt;b&gt;11,570 redirects/sec&lt;/b&gt;.&lt;/li&gt;&lt;li&gt;10-year records: 100M * 365 * 10 = &lt;b&gt;365B URLs&lt;/b&gt;.&lt;/li&gt;&lt;li&gt;Raw URL storage: 365B * 100 bytes = &lt;b&gt;36.5TB&lt;/b&gt;.&lt;/li&gt;&lt;li&gt;Real storage is higher: metadata, indexes, replication, compression behavior, tombstones, backups.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;Design habit: state assumptions, then round numbers for easy reasoning.&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="780" y="90" width="430" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="api" value="&lt;h2&gt;API design&lt;/h2&gt;&lt;div&gt;&lt;b&gt;Create&lt;/b&gt;&lt;/div&gt;&lt;div&gt;POST /api/v1/shorten&lt;/div&gt;&lt;div&gt;Body: { url, optional custom_alias, optional expires_at }&lt;/div&gt;&lt;div&gt;201: { code, short_url, long_url }&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;b&gt;Redirect&lt;/b&gt;&lt;/div&gt;&lt;div&gt;GET /{code}&lt;/div&gt;&lt;div&gt;302 Found + Location: long_url&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;b&gt;Status choices&lt;/b&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;302 by default: easier to change/disable links.&lt;/li&gt;&lt;li&gt;301 only for immutable links because clients/CDNs may cache permanently.&lt;/li&gt;&lt;/ul&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="1230" y="90" width="430" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="capacity" value="&lt;h2&gt;Short code capacity&lt;/h2&gt;&lt;div&gt;Alphabet size = 62 characters.&lt;/div&gt;&lt;br&gt;&lt;div&gt;Capacity formula: &lt;b&gt;62^length&lt;/b&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;1 char = 62 → too small/risky for public generation.&lt;/li&gt;&lt;li&gt;5 chars ≈ 916M → compact, but only ~9 days at 100M/day.&lt;/li&gt;&lt;li&gt;6 chars ≈ 56.8B → ~568 days at 100M/day.&lt;/li&gt;&lt;li&gt;7 chars ≈ 3.52T → enough for 365B records / 10 years.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;Decision: use variable-length base62 with &lt;b&gt;minimum public generated length = 5&lt;/b&gt;. Reserve 1–4 char codes for internal/premium/manual aliases.&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="1680" y="90" width="500" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend" value="&lt;h2 style=&quot;margin-top:0px;font-size:24px;&quot;&gt;Legend&lt;/h2&gt;&lt;table cellpadding=&quot;8&quot; cellspacing=&quot;0&quot; style=&quot;font-size:16px;border-collapse:collapse;&quot;&gt;&lt;tr&gt;&lt;td style=&quot;background:#dae8fc;border:2px solid #6c8ebf;width:90px;&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Blue&lt;/b&gt;: traffic edge / client-facing network&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;background:#d5e8d4;border:2px solid #82b366;&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Green&lt;/b&gt;: application/API logic and request flows&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;background:#f8cecc;border:2px solid #b85450;&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Red&lt;/b&gt;: cache and abuse/security-sensitive areas&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;background:#e1d5e7;border:2px solid #9673a6;&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Purple&lt;/b&gt;: primary storage and data model&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;background:#ffe6cc;border:2px solid #d79b00;&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Orange&lt;/b&gt;: asynchronous processing / analytics&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;background:#fff2cc;border:2px solid #d6b656;&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Yellow&lt;/b&gt;: estimates, capacity, tradeoffs, decisions&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;background:#f5f5f5;border:2px solid #666666;&quot;&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Gray&lt;/b&gt;: observability and design checklist&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#ffffff;strokeColor=#000000;spacing=14;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="390" width="520" height="360" as="geometry"/>
+                </mxCell>
+                <mxCell id="client" value="Client / Browser / App" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="720" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="dns" value="DNS + CDN / Edge&lt;br&gt;optional edge cache for redirects" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="1190" y="710" width="220" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="lb" value="Load Balancer&lt;br&gt;health checks, TLS termination" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="1490" y="710" width="220" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="apiCluster" value="Stateless API service cluster&lt;br&gt;shorten + redirect handlers&lt;br&gt;rate limit, validation, auth optional" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1780" y="710" width="260" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="redis" value="Redis Cluster&lt;br&gt;&lt;b&gt;Hot redirect cache&lt;/b&gt;&lt;br&gt;code → long_url&lt;br&gt;&lt;b&gt;ID allocator option&lt;/b&gt;&lt;br&gt;atomic INCR / range allocation" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+                    <mxGeometry x="1950" y="480" width="250" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="storage" value="Primary storage&lt;br&gt;source of truth&lt;br&gt;short_code → long_url + metadata&lt;br&gt;partition by code&lt;br&gt;replicated across AZs" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+                    <mxGeometry x="2210" y="720" width="250" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="queue" value="Async queue / stream&lt;br&gt;click events, analytics,&lt;br&gt;abuse scanning, webhooks later" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="1640" y="940" width="260" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="analytics" value="Analytics workers&lt;br&gt;eventual consistency&lt;br&gt;aggregates, reports, fraud signals" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="1340" y="950" width="220" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="obs" value="Observability&lt;br&gt;metrics, logs, traces, alerts&lt;br&gt;request IDs and SLO dashboards" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="2030" y="940" width="250" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="client" target="dns" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="dns" target="lb" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="lb" target="apiCluster" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" value="cache get/set" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="apiCluster" target="redis" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" value="cache miss / writes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="apiCluster" target="storage" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6" value="events only; do not block redirect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="apiCluster" target="queue" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="queue" target="analytics" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8" value="metrics/logs/traces" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="apiCluster" target="obs" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1970" y="885"/>
+                            <mxPoint x="2155" y="885"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="writeFlow" value="&lt;h2&gt;Write path: create short URL&lt;/h2&gt;&lt;ol&gt;&lt;li&gt;Receive POST /api/v1/shorten.&lt;/li&gt;&lt;li&gt;Authenticate user if user accounts exist.&lt;/li&gt;&lt;li&gt;Rate limit creator/IP/API key.&lt;/li&gt;&lt;li&gt;Validate URL: scheme, host, length, denylist checks.&lt;/li&gt;&lt;li&gt;Allocate unique numeric ID or custom alias.&lt;/li&gt;&lt;li&gt;Encode ID to base62, optionally obfuscate alphabet/hashid.&lt;/li&gt;&lt;li&gt;Persist code → long_url + metadata with uniqueness constraint.&lt;/li&gt;&lt;li&gt;Optionally warm cache.&lt;/li&gt;&lt;li&gt;Return short URL.&lt;/li&gt;&lt;/ol&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry y="1210" width="420" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="readFlow" value="&lt;h2&gt;Read path: redirect&lt;/h2&gt;&lt;ol&gt;&lt;li&gt;Receive GET /{code}.&lt;/li&gt;&lt;li&gt;Validate code format and length.&lt;/li&gt;&lt;li&gt;Check Redis/edge cache for code.&lt;/li&gt;&lt;li&gt;On cache hit: return 302 + Location immediately.&lt;/li&gt;&lt;li&gt;On miss: read primary storage.&lt;/li&gt;&lt;li&gt;If missing/disabled/expired: return 404 or 410.&lt;/li&gt;&lt;li&gt;If found: set cache and redirect.&lt;/li&gt;&lt;li&gt;Publish click event asynchronously.&lt;/li&gt;&lt;/ol&gt;&lt;div&gt;Redirect latency is the most important user-facing path.&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="1210" width="420" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="generation" value="&lt;h2&gt;Code generation options&lt;/h2&gt;&lt;div&gt;&lt;b&gt;Random code&lt;/b&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;+ Harder to guess.&lt;/li&gt;&lt;li&gt;- Needs collision checks and retries.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;&lt;b&gt;Counter + base62&lt;/b&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;+ Shortest natural encoding; length grows over time.&lt;/li&gt;&lt;li&gt;+ No collision checks if ID is unique.&lt;/li&gt;&lt;li&gt;- Guessable/enumerable without obfuscation/rate limits.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;&lt;b&gt;Minimum length policy&lt;/b&gt;: start generated IDs at 62^4 so first public generated codes are 5 chars. Keep 1–4 char namespace reserved.&lt;/div&gt;&lt;br&gt;&lt;div&gt;Recommended answer: unique ID → base62 + minimum length + DB uniqueness + obfuscation/rate limits if enumeration matters.&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="1210" width="420" height="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="dataModel" value="&lt;h2&gt;Data model&lt;/h2&gt;&lt;div&gt;&lt;b&gt;Main table / collection&lt;/b&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;short_code primary key&lt;/li&gt;&lt;li&gt;long_url&lt;/li&gt;&lt;li&gt;created_at, updated_at&lt;/li&gt;&lt;li&gt;expires_at nullable&lt;/li&gt;&lt;li&gt;disabled_at nullable&lt;/li&gt;&lt;li&gt;created_by nullable&lt;/li&gt;&lt;li&gt;metadata: title, tags, campaign optional&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;&lt;b&gt;Access patterns&lt;/b&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;Hot read: code → long_url.&lt;/li&gt;&lt;li&gt;Write: insert code mapping once.&lt;/li&gt;&lt;li&gt;Analytics should be separate from redirect lookup.&lt;/li&gt;&lt;/ul&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#e1d5e7;strokeColor=#9673a6;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="1320" y="1210" width="400" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="dbChoice" value="&lt;h2&gt;Storage choice discussion&lt;/h2&gt;&lt;div&gt;&lt;b&gt;PostgreSQL&lt;/b&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;+ Good for local development, correctness, transactions.&lt;/li&gt;&lt;li&gt;- Needs sharding/partitioning at very large scale.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;&lt;b&gt;Cassandra / DynamoDB&lt;/b&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;+ Horizontally scalable key-value lookup.&lt;/li&gt;&lt;li&gt;+ Good for code → URL access pattern.&lt;/li&gt;&lt;li&gt;- More operational complexity, eventual consistency tradeoffs.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;Design around access pattern: &lt;b&gt;short_code as partition key&lt;/b&gt;.&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#e1d5e7;strokeColor=#9673a6;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="1740" y="1210" width="420" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="cacheDetail" value="&lt;h2&gt;Caching strategy&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Cache key: url:{code} → long_url.&lt;/li&gt;&lt;li&gt;Use cache-aside/read-through pattern.&lt;/li&gt;&lt;li&gt;On redirect cache miss, read DB, then populate cache.&lt;/li&gt;&lt;li&gt;Long TTL if links are immutable.&lt;/li&gt;&lt;li&gt;Shorter TTL or invalidation if links can be disabled/changed.&lt;/li&gt;&lt;li&gt;Cache unavailable: service should fall back to DB, with higher latency.&lt;/li&gt;&lt;li&gt;CDN edge caching can reduce origin load, especially with 301/long TTL policies.&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;Track cache hit ratio. Low hit ratio means DB absorbs redirect load.&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#f8cecc;strokeColor=#b85450;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry y="1590" width="420" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="consistency" value="&lt;h2&gt;Consistency and uniqueness&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Invariant: one code must never point to two different URLs.&lt;/li&gt;&lt;li&gt;Use unique ID allocation or unique DB constraint on short_code.&lt;/li&gt;&lt;li&gt;For random codes: retry on collision.&lt;/li&gt;&lt;li&gt;For counters: Redis INCR, DB sequence, Snowflake, or range allocation.&lt;/li&gt;&lt;li&gt;Same long URL behavior is a product choice: deduplicate or create new code each time.&lt;/li&gt;&lt;li&gt;Analytics can be eventually consistent; redirects should be strongly correct for code lookup.&lt;/li&gt;&lt;/ul&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="1590" width="420" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="availability" value="&lt;h2&gt;Availability and scaling&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;API servers are stateless → horizontal scaling behind LB.&lt;/li&gt;&lt;li&gt;Health checks remove bad instances.&lt;/li&gt;&lt;li&gt;Primary storage replicated across availability zones.&lt;/li&gt;&lt;li&gt;Partition/shard storage by short_code hash.&lt;/li&gt;&lt;li&gt;Redis Cluster for cache scale and failover.&lt;/li&gt;&lt;li&gt;Queue decouples analytics from redirect latency.&lt;/li&gt;&lt;li&gt;Graceful degradation: if analytics fails, redirects still work.&lt;/li&gt;&lt;/ul&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="1590" width="420" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="security" value="&lt;h2&gt;Security and abuse prevention&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Validate scheme: allow http/https only.&lt;/li&gt;&lt;li&gt;Reject malformed URLs and excessive length.&lt;/li&gt;&lt;li&gt;Rate limit creation by IP/user/API key.&lt;/li&gt;&lt;li&gt;Detect malware/phishing with denylist or async scanner.&lt;/li&gt;&lt;li&gt;Sequential codes are enumerable; obfuscate/rate limit if enumeration matters.&lt;/li&gt;&lt;li&gt;Protected/private links require auth and cannot be treated as public redirects.&lt;/li&gt;&lt;li&gt;Avoid logging sensitive full URLs by default.&lt;/li&gt;&lt;/ul&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#f8cecc;strokeColor=#b85450;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="1320" y="1590" width="400" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="design-discussion" value="&lt;h2&gt;Design discussion checklist&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Clarify requirements before architecture.&lt;/li&gt;&lt;li&gt;Separate hot path redirect from analytics.&lt;/li&gt;&lt;li&gt;Explain 302 vs 301 tradeoff.&lt;/li&gt;&lt;li&gt;Calculate code length using 62^N.&lt;/li&gt;&lt;li&gt;Choose code generation strategy and collision handling.&lt;/li&gt;&lt;li&gt;State cache miss behavior and Redis failure behavior.&lt;/li&gt;&lt;li&gt;Discuss DB access pattern and partition key.&lt;/li&gt;&lt;li&gt;Call out abuse prevention and observability.&lt;/li&gt;&lt;li&gt;Mention open questions instead of assuming product behavior.&lt;/li&gt;&lt;/ul&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#f5f5f5;strokeColor=#666666;spacing=12;" parent="1" vertex="1">
+                    <mxGeometry x="1740" y="1590" width="420" height="300" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
