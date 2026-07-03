@@ -26,6 +26,7 @@ Build the smallest runnable URL shortener with in-memory storage.
   - `GET /{code}`;
   - `GET /healthz`.
 - Use the Go standard library HTTP stack.
+- Follow TDD for code generation, application service behavior, and HTTP handlers.
 - Add stable JSON error responses:
 
 ```json
@@ -38,6 +39,17 @@ Build the smallest runnable URL shortener with in-memory storage.
 ```
 
 - Build returned short URLs from `BASE_URL`.
+- Add `Makefile` targets:
+  - `fmt`;
+  - `test`;
+  - `test-race`;
+  - `vet`;
+  - `validate`.
+- Add initial GitHub Actions CI for:
+  - format check;
+  - `go vet ./...`;
+  - `go test ./...`;
+  - `go test -race ./...`.
 - Add tests for encoder, service, and HTTP handlers.
 
 ## Out of scope
@@ -53,7 +65,7 @@ Build the smallest runnable URL shortener with in-memory storage.
 ## Validation target
 
 ```bash
-go test ./...
+make validate
 ```
 
 ## Completion criteria

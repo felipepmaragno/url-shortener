@@ -20,6 +20,7 @@ Start here:
 - [Product scope](docs/product.md)
 - [Behavior spec](docs/spec.md)
 - [Architecture](docs/architecture.md)
+- [Engineering standards](docs/engineering.md)
 - [Operations](docs/operations.md)
 - [Progress](PROGRESS.md)
 
@@ -42,6 +43,7 @@ The initial target is to provide these commands:
 
 ```bash
 make test
+make test-race
 make run
 make validate
 ```

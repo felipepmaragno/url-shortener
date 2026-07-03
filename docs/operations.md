@@ -26,7 +26,17 @@ make up          # start dependencies
 make migrate     # run database migrations
 make run         # run service locally
 make test        # run tests
+make test-race   # run tests with the race detector
 make validate    # run full local validation
+```
+
+The first MVP should introduce `make validate` with:
+
+```text
+format check
+go vet ./...
+go test ./...
+go test -race ./...
 ```
 
 ## Planned smoke test

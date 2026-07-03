@@ -13,6 +13,7 @@ This is a service project. Keep the implementation focused and use documentation
 - `docs/product.md`: purpose, users, scope, and non-goals.
 - `docs/spec.md`: externally observable behavior and invariants.
 - `docs/architecture.md`: runtime structure and component responsibilities.
+- `docs/engineering.md`: Go implementation standards, test strategy, and quality gates.
 - `docs/operations.md`: local run, validation, and failure-handling notes.
 - `docs/limitations.md`: accepted limitations and future work boundaries.
 - `docs/adr/`: durable decision history.
@@ -46,6 +47,8 @@ Implementation has not started. Before adding code:
 - Hide persistence behind interfaces.
 - Use `context.Context` for request-scoped work.
 - Start with the Go standard library before adding third-party libraries.
+- Follow TDD for each increment.
+- Keep `make validate` as the local quality gate once available.
 - Treat PostgreSQL as source of truth.
 - Treat redirect cache as disposable.
 - Treat ID allocation as correctness-critical.
