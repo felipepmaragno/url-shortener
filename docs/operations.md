@@ -11,6 +11,14 @@ Implementation has not started. Commands below are planned targets.
 - PostgreSQL
 - Redis
 
+The first MVP has no external runtime dependencies because it uses in-memory storage.
+
+## Planned configuration
+
+```bash
+BASE_URL=http://localhost:8080
+```
+
 ## Planned commands
 
 ```bash
@@ -36,4 +44,3 @@ curl -i http://localhost:8080/{code}
 - Redis cache down: redirect falls back to PostgreSQL.
 - Redis allocator down: creates continue while local ID range remains; fail safely after range exhaustion.
 - PostgreSQL down: creates fail; redirects work only for cached active links.
-

@@ -38,6 +38,19 @@ Errors:
 - `429 Too Many Requests`: rate limited.
 - `500 Internal Server Error`: unexpected failure.
 
+Error responses use a stable JSON envelope:
+
+```json
+{
+  "error": {
+    "code": "invalid_url",
+    "message": "invalid URL"
+  }
+}
+```
+
+The first MVP should use this shape even if it only supports a small set of errors.
+
 ## Redirect
 
 ```http
@@ -61,6 +74,17 @@ Errors:
 - One short code must never point to two different long URLs.
 - Generated public codes must use base62.
 - Generated public codes must have minimum length 5.
+- The MVP should implement minimum length by starting generated numeric IDs at `62^4`.
 - Codes with length 1–4 are reserved for internal, premium, or manual aliases.
 - Cache is not source of truth.
 - Primary storage is source of truth.
+
+## Configuration
+
+The service builds returned short URLs from a configured base URL.
+
+For local development:
+
+```text
+BASE_URL=http://localhost:8080
+```

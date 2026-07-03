@@ -16,7 +16,7 @@ Build the smallest runnable URL shortener with in-memory storage.
 
 - Create Go module.
 - Add base62 encoder.
-- Add minimum generated code length of 5.
+- Add minimum generated code length of 5 by starting generated numeric IDs at `62^4`.
 - Add in-memory URL repository.
 - Add application service for:
   - creating a short URL;
@@ -25,6 +25,19 @@ Build the smallest runnable URL shortener with in-memory storage.
   - `POST /api/v1/shorten`;
   - `GET /{code}`;
   - `GET /healthz`.
+- Use the Go standard library HTTP stack.
+- Add stable JSON error responses:
+
+```json
+{
+  "error": {
+    "code": "invalid_url",
+    "message": "invalid URL"
+  }
+}
+```
+
+- Build returned short URLs from `BASE_URL`.
 - Add tests for encoder, service, and HTTP handlers.
 
 ## Out of scope
@@ -49,4 +62,4 @@ go test ./...
 - Unknown codes return `404`.
 - Redirects use `302` and the `Location` header.
 - Tests pass.
-
+- Branch is pushed and opened as a draft pull request targeting `main`.

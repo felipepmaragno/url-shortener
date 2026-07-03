@@ -32,6 +32,7 @@ Go API service
 - Resolve codes for redirects.
 - Apply cache-aside lookup.
 - Return HTTP responses.
+- Use the Go standard library HTTP stack first. Add a router or framework only when routing or middleware complexity justifies it.
 
 ### PostgreSQL
 
@@ -54,7 +55,7 @@ Go API service
 
 - Use `302` redirects by default.
 - Use variable-length base62 codes with minimum generated length 5.
+- Start generated numeric IDs at `62^4` to enforce the minimum generated length.
 - Reserve 1–4 character codes.
 - Use Redis `INCRBY` range allocation for production-minded ID generation.
 - Keep analytics and fraud detection outside the core implementation.
-

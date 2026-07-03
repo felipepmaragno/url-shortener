@@ -31,12 +31,21 @@ Implementation has not started. Before adding code:
 3. Add tests with the feature.
 4. Update `PROGRESS.md` when verified state changes.
 
+## Branch and PR workflow
+
+- `main` is the integration branch.
+- Each increment branch starts from `main`.
+- Each increment is merged back to `main`.
+- Branch names follow the active execution plan, for example `increment/001-simple-mvp`.
+- End each increment with a pushed branch and a draft pull request.
+
 ## Expected engineering style
 
 - Keep HTTP handlers thin.
 - Put business behavior in application services.
 - Hide persistence behind interfaces.
 - Use `context.Context` for request-scoped work.
+- Start with the Go standard library before adding third-party libraries.
 - Treat PostgreSQL as source of truth.
 - Treat redirect cache as disposable.
 - Treat ID allocation as correctness-critical.
