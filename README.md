@@ -13,7 +13,7 @@ The project focuses on the core system design first:
 
 ## Current status
 
-Documentation scaffold is being prepared. Implementation has not started yet.
+The simple in-memory MVP is implemented on the active feature branch.
 
 Start here:
 
@@ -39,7 +39,7 @@ Supporting design references:
 
 ## Planned validation
 
-The initial target is to provide these commands:
+Local validation:
 
 ```bash
 make test
@@ -47,5 +47,3 @@ make test-race
 make run
 make validate
 ```
-
-These commands do not exist yet.
