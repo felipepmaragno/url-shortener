@@ -37,7 +37,7 @@ Implementation has not started. Before adding code:
 - `main` is the integration branch.
 - Each increment branch starts from `main`.
 - Each increment is merged back to `main`.
-- Branch names follow the active execution plan, for example `increment/001-simple-mvp`.
+- Branch names use `feature/...` for feature work and `fix/...` for corrections, for example `feature/001-simple-mvp`.
 - End each increment with a pushed branch and a draft pull request.
 
 ## Expected engineering style

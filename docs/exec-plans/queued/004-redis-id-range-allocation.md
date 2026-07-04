@@ -6,7 +6,7 @@ Queued.
 
 ## Branch
 
-`increment/004-redis-id-range-allocation`
+`feature/004-redis-id-range-allocation`
 
 ## Objective
 

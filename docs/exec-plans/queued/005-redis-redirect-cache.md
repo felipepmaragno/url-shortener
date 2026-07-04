@@ -6,7 +6,7 @@ Queued.
 
 ## Branch
 
-`increment/005-redis-redirect-cache`
+`feature/005-redis-redirect-cache`
 
 ## Objective
 

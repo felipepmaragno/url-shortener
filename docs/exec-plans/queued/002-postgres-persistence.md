@@ -6,7 +6,7 @@ Queued.
 
 ## Branch
 
-`increment/002-postgres-persistence`
+`feature/002-postgres-persistence`
 
 ## Objective
 

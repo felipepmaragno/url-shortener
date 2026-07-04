@@ -6,7 +6,7 @@ Queued.
 
 ## Branch
 
-`increment/003-custom-aliases-and-expiration`
+`feature/003-custom-aliases-and-expiration`
 
 ## Objective
 

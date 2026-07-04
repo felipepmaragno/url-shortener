@@ -6,7 +6,7 @@ Queued.
 
 ## Branch
 
-`increment/006-operational-baseline`
+`feature/006-operational-baseline`
 
 ## Objective
 

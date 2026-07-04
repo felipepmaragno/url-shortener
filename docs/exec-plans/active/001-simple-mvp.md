@@ -6,7 +6,7 @@ Active.
 
 ## Branch
 
-`increment/001-simple-mvp`
+`feature/001-simple-mvp`
 
 ## Objective
 
