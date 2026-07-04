@@ -4,7 +4,7 @@ This document owns local run, validation, and operational notes.
 
 ## Current state
 
-Implementation has not started. Commands below are planned targets.
+The simple in-memory MVP can run without external dependencies.
 
 ## Planned local dependencies
 
@@ -19,7 +19,7 @@ The first MVP has no external runtime dependencies because it uses in-memory sto
 BASE_URL=http://localhost:8080
 ```
 
-## Planned commands
+## Commands
 
 ```bash
 make up          # start dependencies
@@ -39,7 +39,7 @@ go test ./...
 go test -race ./...
 ```
 
-## Planned smoke test
+## Smoke test
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/shorten \
